@@ -16,8 +16,8 @@ processResources {
     inputs.property 'version', project.mod_version
     filesMatching('fabric.mod.json') { expand 'version': project.mod_version }
 }
-tasks.withType(JavaCompile).configureEach { it.options.release = 25 }
+tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
 java {
-    toolchain { languageVersion = JavaLanguageVersion.of(25) }
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
     withSourcesJar()
 }

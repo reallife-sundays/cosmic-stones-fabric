@@ -1,55 +1,75 @@
 package com.cosmicstones.item;
 
 import com.cosmicstones.CosmicStonesMod;
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 
 public class CosmicSiphonItem extends Item {
-    public CosmicSiphonItem(Settings settings) { super(settings); }
+    public CosmicSiphonItem(Properties properties) {
+        super(properties);
+    }
 
     public static String getSocketedStone(ItemStack stack) {
-        if (!stack.hasNbt()) return "";
-        NbtCompound tag = stack.getNbt();
-        return tag != null ? tag.getString("SocketedStone") : "";
+        CustomData comp = stack.get(DataComponents.CUSTOM_DATA);
+        if (comp == null) return "";
+        return comp.copyTag().getStringOr("SocketedStone", "");
     }
 
     public static boolean isPassiveEnabled(ItemStack stack) {
-        if (!stack.hasNbt()) return true;
-        NbtCompound tag = stack.getNbt();
-        return tag == null || !tag.contains("PassiveEnabled") || tag.getBoolean("PassiveEnabled");
+        CustomData comp = stack.get(DataComponents.CUSTOM_DATA);
+        if (comp == null) return true;
+        CompoundTag tag = comp.copyTag();
+        return !tag.contains("PassiveEnabled") || tag.getBooleanOr("PassiveEnabled", true);
+    }
+
+    private static void syncModelData(ItemStack stack, String stone) {
+        float cmd = switch (stone) {
+            case "power" -> 1.0F;
+            case "space" -> 2.0F;
+            case "time" -> 3.0F;
+            case "reality" -> 4.0F;
+            case "soul" -> 5.0F;
+            case "mind" -> 6.0F;
+            default -> 0.0F;
+        };
+        stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(cmd), List.of(), List.of(), List.of()));
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext ctx) {
-        World world = ctx.getWorld();
-        BlockPos pos = ctx.getBlockPos();
-        PlayerEntity player = ctx.getPlayer();
-        ItemStack stack = ctx.getStack();
+    public InteractionResult useOn(UseOnContext ctx) {
+        Level level = ctx.getLevel();
+        BlockPos pos = ctx.getClickedPos();
+        Player player = ctx.getPlayer();
+        ItemStack stack = ctx.getItemInHand();
 
-        if (player != null && player.isSneaking() && world.getBlockState(pos).getBlock() instanceof AnvilBlock) {
+        if (player != null && player.isShiftKeyDown() && level.getBlockState(pos).is(BlockTags.ANVIL)) {
             String stone = getSocketedStone(stack);
-            if (!stone.isEmpty() && !world.isClient) {
+            if (!stone.isEmpty() && !level.isClientSide()) {
                 Item item = switch (stone) {
                     case "power" -> CosmicStonesMod.POWER_STONE;
                     case "space" -> CosmicStonesMod.SPACE_STONE;
@@ -58,78 +78,90 @@ public class CosmicSiphonItem extends Item {
                     case "soul" -> CosmicStonesMod.SOUL_STONE;
                     default -> CosmicStonesMod.MIND_STONE;
                 };
-                stack.getOrCreateNbt().remove("SocketedStone");
-                player.getInventory().offerOrDrop(new ItemStack(item));
-                world.playSound(null, pos, SoundEvents.BLOCK_ANVIL_USE, SoundCategory.PLAYERS, 1.0F, 1.0F);
-                player.sendMessage(Text.literal("Extracted " + stone.toUpperCase() + " Stone.").formatted(Formatting.YELLOW), true);
-                return ActionResult.SUCCESS;
+
+                CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+                tag.remove("SocketedStone");
+                stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+                syncModelData(stack, "");
+
+                player.getInventory().placeItemBackInInventory(new ItemStack(item));
+                level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
+                player.displayClientMessage(Component.literal("Extracted " + stone.toUpperCase() + " Stone.").withStyle(ChatFormatting.YELLOW), true);
+                return InteractionResult.SUCCESS;
             }
         }
-        return super.useOnBlock(ctx);
+        return super.useOn(ctx);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-        ItemStack stack = player.getStackInHand(hand);
-        if (world.isClient) return TypedActionResult.success(stack);
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
-        NbtCompound tag = stack.getOrCreateNbt();
-        String stone = tag.getString("SocketedStone");
+        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        String stone = tag.getStringOr("SocketedStone", "");
 
-        ItemStack offhand = player.getOffHandStack();
-        if (player.isSneaking() && offhand.getItem() instanceof RawStoneItem raw) {
+        ItemStack offhand = player.getOffhandItem();
+        if (player.isShiftKeyDown() && offhand.getItem() instanceof RawStoneItem raw) {
             if (!stone.isEmpty()) {
-                player.sendMessage(Text.literal("Siphon occupied! Use an Anvil while sneaking to extract.").formatted(Formatting.RED), true);
-                return TypedActionResult.fail(stack);
+                player.displayClientMessage(Component.literal("Siphon occupied! Use an Anvil while sneaking to extract.").withStyle(ChatFormatting.RED), true);
+                return InteractionResult.FAIL;
             }
             tag.putString("SocketedStone", raw.getStoneType());
             tag.putBoolean("PassiveEnabled", true);
-            offhand.decrement(1);
-            world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.PLAYERS, 1.0F, 1.2F);
-            return TypedActionResult.success(stack);
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            syncModelData(stack, raw.getStoneType());
+
+            offhand.shrink(1);
+            level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.2F);
+            return InteractionResult.SUCCESS;
         }
 
-        if (stone.isEmpty()) return TypedActionResult.pass(stack);
+        if (stone.isEmpty()) return InteractionResult.PASS;
 
-        int cd = executeMinor((ServerWorld) world, player, stone);
-        if (cd > 0) player.getItemCooldownManager().set(this, cd);
-        return TypedActionResult.success(stack);
+        int cd = executeMinor((ServerLevel) level, player, stone);
+        if (cd > 0) player.getCooldowns().addCooldown(stack, cd);
+        return InteractionResult.SUCCESS;
     }
 
-    private int executeMinor(ServerWorld world, PlayerEntity player, String stone) {
+    private int executeMinor(ServerLevel level, Player player, String stone) {
         switch (stone) {
             case "power" -> {
-                int stacks = player.getScoreboardTags().stream().filter(t -> t.startsWith("overcharge_")).mapToInt(t -> Integer.parseInt(t.replace("overcharge_", ""))).findFirst().orElse(0);
-                player.getScoreboardTags().removeIf(t -> t.startsWith("overcharge_"));
+                int stacks = player.getTags().stream()
+                        .filter(t -> t.startsWith("overcharge_"))
+                        .mapToInt(t -> Integer.parseInt(t.replace("overcharge_", "")))
+                        .findFirst().orElse(0);
+                player.getTags().removeIf(t -> t.startsWith("overcharge_"));
+
                 float radius = stacks >= 8 ? 10.0F : (stacks >= 4 ? 7.0F : 4.0F);
                 float damage = stacks >= 8 ? 16.0F : (stacks >= 4 ? 10.0F : 6.0F);
 
-                for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, player.getBoundingBox().expand(radius), e -> e != player)) {
-                    target.damage(world.getDamageSources().playerAttack(player), damage);
-                    target.addVelocity(0, 0.55D + (stacks * 0.05D), 0);
-                    target.velocityModified = true;
+                for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> e != player)) {
+                    target.hurtServer(level, level.damageSources().playerAttack(player), damage);
+                    target.push(0, 0.55D + (stacks * 0.05D), 0);
+                    target.hurtMarked = true;
                 }
-                world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, player.getX(), player.getY(), player.getZ(), 1, 0, 0, 0, 0);
-                world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 1.5F, 0.7F);
+                level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, player.getX(), player.getY(), player.getZ(), 1, 0, 0, 0, 0);
+                level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.5F, 0.7F);
                 return 900;
             }
             case "space" -> {
-                Vec3d start = player.getEyePos();
-                Vec3d look = player.getRotationVector().normalize();
-                Vec3d end = start.add(look.multiply(14.0D));
-                BlockHitResult hit = world.raycast(new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player));
-                BlockPos targetPos = hit.getBlockPos().offset(hit.getSide());
-                player.teleport(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
-                player.onLanding();
-                world.playSound(null, targetPos, SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 1.0F, 1.0F);
+                Vec3 start = player.getEyePosition();
+                Vec3 look = player.getLookAngle().normalize();
+                Vec3 end = start.add(look.scale(14.0D));
+                BlockHitResult hit = level.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+                BlockPos targetPos = hit.getBlockPos().relative(hit.getDirection());
+                player.teleportTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
+                player.resetFallDistance();
+                level.playSound(null, targetPos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 1.0F);
                 return 800;
             }
             case "mind" -> {
-                for (MobEntity mob : world.getEntitiesByClass(MobEntity.class, player.getBoundingBox().expand(16.0D), e -> true)) {
+                for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16.0D), e -> true)) {
                     mob.setTarget(null);
-                    if (mob instanceof CreeperEntity c) c.setFuseSpeed(-1);
+                    if (mob instanceof Creeper c) c.setSwellDir(-1);
                 }
-                world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.PLAYERS, 1.2F, 1.5F);
+                level.playSound(null, player.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.2F, 1.5F);
                 return 1200;
             }
         }

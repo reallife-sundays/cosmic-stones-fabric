@@ -3,58 +3,61 @@ package com.cosmicstones.event;
 import com.cosmicstones.item.CosmicSiphonItem;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class PassiveHandler {
     public static void init() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 ItemStack siphon = findSiphon(player);
                 if (siphon.isEmpty() || !CosmicSiphonItem.isPassiveEnabled(siphon)) continue;
                 String stone = CosmicSiphonItem.getSocketedStone(siphon);
-                if ("space".equals(stone)) player.onLanding();
+                if ("space".equals(stone)) player.resetFallDistance();
             }
         });
 
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
-            if (!world.isClient && hand == Hand.MAIN_HAND && entity instanceof LivingEntity living) {
+            if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND && entity instanceof LivingEntity living && world instanceof ServerLevel sw) {
                 ItemStack siphon = findSiphon(player);
                 if (!siphon.isEmpty() && CosmicSiphonItem.isPassiveEnabled(siphon)) {
                     if ("power".equals(CosmicSiphonItem.getSocketedStone(siphon))) {
                         int stacks = getStacks(player);
                         if (stacks < 10) setStacks(player, stacks + 1);
-                        living.damage(world.getDamageSources().playerAttack(player), stacks * 1.5F);
-                        if (stacks == 10 && world instanceof ServerWorld sw) {
-                            sw.spawnParticles(ParticleTypes.EXPLOSION, living.getX(), living.getY() + 1, living.getZ(), 1, 0, 0, 0, 0);
+                        living.hurtServer(sw, sw.damageSources().playerAttack(player), stacks * 1.5F);
+                        if (stacks == 10) {
+                            sw.sendParticles(ParticleTypes.EXPLOSION, living.getX(), living.getY() + 1, living.getZ(), 1, 0, 0, 0, 0);
                         }
                     }
                 }
             }
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
     }
 
-    private static int getStacks(PlayerEntity player) {
-        return player.getScoreboardTags().stream().filter(t -> t.startsWith("overcharge_")).mapToInt(t -> Integer.parseInt(t.replace("overcharge_", ""))).findFirst().orElse(0);
+    private static int getStacks(Player player) {
+        return player.getTags().stream()
+                .filter(t -> t.startsWith("overcharge_"))
+                .mapToInt(t -> Integer.parseInt(t.replace("overcharge_", "")))
+                .findFirst().orElse(0);
     }
 
-    private static void setStacks(PlayerEntity player, int val) {
-        player.getScoreboardTags().removeIf(t -> t.startsWith("overcharge_"));
-        player.addScoreboardTag("overcharge_" + val);
+    private static void setStacks(Player player, int val) {
+        player.getTags().removeIf(t -> t.startsWith("overcharge_"));
+        player.addTag("overcharge_" + val);
     }
 
-    private static ItemStack findSiphon(PlayerEntity player) {
-        if (player.getMainHandStack().getItem() instanceof CosmicSiphonItem) return player.getMainHandStack();
-        if (player.getOffHandStack().getItem() instanceof CosmicSiphonItem) return player.getOffHandStack();
+    private static ItemStack findSiphon(Player player) {
+        if (player.getMainHandItem().getItem() instanceof CosmicSiphonItem) return player.getMainHandItem();
+        if (player.getOffhandItem().getItem() instanceof CosmicSiphonItem) return player.getOffhandItem();
         for (int i = 0; i < 9; i++) {
-            ItemStack s = player.getInventory().getStack(i);
+            ItemStack s = player.getInventory().getItem(i);
             if (s.getItem() instanceof CosmicSiphonItem) return s;
         }
         return ItemStack.EMPTY;

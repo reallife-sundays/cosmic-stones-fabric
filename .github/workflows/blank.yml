@@ -867,5 +867,3 @@ jobs:
         with:
           name: cosmicstones-fabric-26.3
           path: build/libs/*[!sources].jar
-
-```

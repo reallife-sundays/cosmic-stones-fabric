@@ -716,9 +716,11 @@ jobs:
           '''
           }
 
-          # Write all source and asset files
+          # Write all source and asset files safely
           for path, content in files.items():
-              os.makedirs(os.path.dirname(path), exist_ok=True)
+              parent = os.path.dirname(path)
+              if parent:
+                  os.makedirs(parent, exist_ok=True)
               with open(path, 'w', encoding='utf-8') as f:
                   f.write(content)
 
@@ -737,7 +739,9 @@ jobs:
               'src/main/resources/assets/cosmicstones/textures/item/mind_stone.png'
           ]
           for t in tex_list:
-              os.makedirs(os.path.dirname(t), exist_ok=True)
+              parent = os.path.dirname(t)
+              if parent:
+                  os.makedirs(parent, exist_ok=True)
               with open(t, 'wb') as f:
                   f.write(png_data)
           "

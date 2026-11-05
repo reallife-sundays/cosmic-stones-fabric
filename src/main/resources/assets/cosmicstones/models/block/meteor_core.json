@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": { "crust": "cosmicstones:block/meteor_core", "glow": "cosmicstones:block/meteor_core_glow", "particle": "cosmicstones:block/meteor_core" },
+  "elements": [
+    {
+      "from": [2, 2, 2], "to": [14, 14, 14],
+      "faces": {
+        "north": {"uv": [2, 2, 14, 14], "texture": "#glow"}, "east": {"uv": [2, 2, 14, 14], "texture": "#glow"},
+        "south": {"uv": [2, 2, 14, 14], "texture": "#glow"}, "west": {"uv": [2, 2, 14, 14], "texture": "#glow"},
+        "up": {"uv": [2, 2, 14, 14], "texture": "#glow"}, "down": {"uv": [2, 2, 14, 14], "texture": "#glow"}
+      }
+    },
+    {
+      "from": [0, 0, 0], "to": [16, 16, 16],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#crust", "cullface": "north"}, "east": {"uv": [0, 0, 16, 16], "texture": "#crust", "cullface": "east"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "#crust", "cullface": "south"}, "west": {"uv": [0, 0, 16, 16], "texture": "#crust", "cullface": "west"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "#crust", "cullface": "up"}, "down": {"uv": [0, 0, 16, 16], "texture": "#crust", "cullface": "down"}
+      }
+    }
+  ]
+}

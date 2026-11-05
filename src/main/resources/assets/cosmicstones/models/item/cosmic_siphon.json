@@ -1,0 +1,21 @@
+{
+  "textures": { "obsidian": "cosmicstones:item/siphon_obsidian", "gold": "cosmicstones:item/siphon_gold", "particle": "cosmicstones:item/siphon_obsidian" },
+  "elements": [
+    { "from": [7, 2, 7], "to": [9, 10, 9], "faces": { "north": {"uv": [0, 0, 2, 8], "texture": "#obsidian"}, "east": {"uv": [0, 0, 2, 8], "texture": "#obsidian"}, "south": {"uv": [0, 0, 2, 8], "texture": "#obsidian"}, "west": {"uv": [0, 0, 2, 8], "texture": "#obsidian"}, "up": {"uv": [2, 0, 4, 2], "texture": "#obsidian"}, "down": {"uv": [2, 2, 4, 4], "texture": "#obsidian"} } },
+    { "from": [6.5, 0.5, 6.5], "to": [9.5, 2, 9.5], "faces": { "north": {"uv": [0, 0, 3, 1.5], "texture": "#gold"}, "east": {"uv": [0, 0, 3, 1.5], "texture": "#gold"}, "south": {"uv": [0, 0, 3, 1.5], "texture": "#gold"}, "west": {"uv": [0, 0, 3, 1.5], "texture": "#gold"}, "up": {"uv": [3, 0, 6, 3], "texture": "#gold"}, "down": {"uv": [3, 3, 6, 6], "texture": "#gold"} } },
+    { "from": [6, 10, 6], "to": [10, 11.5, 10], "faces": { "north": {"uv": [0, 0, 4, 1.5], "texture": "#gold"}, "east": {"uv": [0, 0, 4, 1.5], "texture": "#gold"}, "south": {"uv": [0, 0, 4, 1.5], "texture": "#gold"}, "west": {"uv": [0, 0, 4, 1.5], "texture": "#gold"}, "up": {"uv": [4, 0, 8, 4], "texture": "#gold"}, "down": {"uv": [4, 4, 8, 8], "texture": "#gold"} } },
+    { "from": [5.5, 11.5, 5.5], "to": [6.75, 16, 6.75], "faces": { "north": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "east": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "south": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "west": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "up": {"uv": [2, 0, 3.25, 1.25], "texture": "#gold"} } },
+    { "from": [9.25, 11.5, 5.5], "to": [10.5, 16, 6.75], "faces": { "north": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "east": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "south": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "west": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "up": {"uv": [2, 0, 3.25, 1.25], "texture": "#gold"} } },
+    { "from": [5.5, 11.5, 9.25], "to": [6.75, 16, 10.5], "faces": { "north": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "east": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "south": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "west": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "up": {"uv": [2, 0, 3.25, 1.25], "texture": "#gold"} } },
+    { "from": [9.25, 11.5, 9.25], "to": [10.5, 16, 10.5], "faces": { "north": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "east": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "south": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "west": {"uv": [0, 0, 1.25, 4.5], "texture": "#gold"}, "up": {"uv": [2, 0, 3.25, 1.25], "texture": "#gold"} } }
+  ],
+  "display": { "gui": {"rotation": [30, 45, -35], "translation": [0, -0.5, 0], "scale": [0.85, 0.85, 0.85]} },
+  "overrides": [
+    {"predicate": {"cosmicstones:socketed_stone": 0.1}, "model": "cosmicstones:item/cosmic_siphon_power"},
+    {"predicate": {"cosmicstones:socketed_stone": 0.2}, "model": "cosmicstones:item/cosmic_siphon_space"},
+    {"predicate": {"cosmicstones:socketed_stone": 0.3}, "model": "cosmicstones:item/cosmic_siphon_time"},
+    {"predicate": {"cosmicstones:socketed_stone": 0.4}, "model": "cosmicstones:item/cosmic_siphon_reality"},
+    {"predicate": {"cosmicstones:socketed_stone": 0.5}, "model": "cosmicstones:item/cosmic_siphon_soul"},
+    {"predicate": {"cosmicstones:socketed_stone": 0.6}, "model": "cosmicstones:item/cosmic_siphon_mind"}
+  ]
+}

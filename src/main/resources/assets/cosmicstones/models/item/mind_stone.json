@@ -1,0 +1,8 @@
+{
+  "textures": { "gem": "cosmicstones:item/mind_stone" },
+  "elements": [
+    { "from": [6.25, 5, 6.75], "to": [9.75, 11, 9.25], "faces": { "north": {"uv": [0, 0, 7, 12], "texture": "#gem"}, "east": {"uv": [7, 0, 12, 12], "texture": "#gem"}, "south": {"uv": [0, 0, 7, 12], "texture": "#gem"}, "west": {"uv": [7, 0, 12, 12], "texture": "#gem"}, "up": {"uv": [0, 0, 7, 5], "texture": "#gem"}, "down": {"uv": [0, 5, 7, 10], "texture": "#gem"} } },
+    { "from": [6.75, 5.75, 6.25], "to": [9.25, 10.25, 9.75], "faces": { "north": {"uv": [2, 2, 7, 11], "texture": "#gem"}, "east": {"uv": [2, 2, 9, 11], "texture": "#gem"}, "south": {"uv": [2, 2, 7, 11], "texture": "#gem"}, "west": {"uv": [2, 2, 9, 11], "texture": "#gem"}, "up": {"uv": [2, 2, 7, 9], "texture": "#gem"}, "down": {"uv": [2, 2, 7, 9], "texture": "#gem"} } }
+  ],
+  "display": { "gui": {"rotation": [25, 215, 0], "translation": [0, 0, 0], "scale": [1.15, 1.15, 1.15]} }
+}

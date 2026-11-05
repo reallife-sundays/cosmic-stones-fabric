@@ -1,0 +1,9 @@
+{
+  "textures": { "gem": "cosmicstones:item/reality_stone" },
+  "elements": [
+    { "from": [6.5, 6, 6.5], "to": [9.5, 10, 9.5], "rotation": {"angle": 22.5, "axis": "x", "origin": [8, 8, 8]}, "faces": { "north": {"uv": [0, 0, 6, 8], "texture": "#gem"}, "east": {"uv": [0, 0, 6, 8], "texture": "#gem"}, "south": {"uv": [0, 0, 6, 8], "texture": "#gem"}, "west": {"uv": [0, 0, 6, 8], "texture": "#gem"}, "up": {"uv": [0, 0, 6, 6], "texture": "#gem"}, "down": {"uv": [0, 0, 6, 6], "texture": "#gem"} } },
+    { "from": [5.25, 9.75, 5.5], "to": [7.25, 11.75, 7.5], "rotation": {"angle": 45, "axis": "y", "origin": [6.25, 10.75, 6.5]}, "faces": { "north": {"uv": [8, 0, 12, 4], "texture": "#gem"}, "east": {"uv": [8, 0, 12, 4], "texture": "#gem"}, "south": {"uv": [8, 0, 12, 4], "texture": "#gem"}, "west": {"uv": [8, 0, 12, 4], "texture": "#gem"}, "up": {"uv": [8, 4, 12, 8], "texture": "#gem"}, "down": {"uv": [8, 4, 12, 8], "texture": "#gem"} } },
+    { "from": [8.75, 4.25, 8.5], "to": [10.5, 6, 10.25], "rotation": {"angle": -22.5, "axis": "z", "origin": [9.5, 5, 9.5]}, "faces": { "north": {"uv": [8, 8, 12, 12], "texture": "#gem"}, "east": {"uv": [8, 8, 12, 12], "texture": "#gem"}, "south": {"uv": [8, 8, 12, 12], "texture": "#gem"}, "west": {"uv": [8, 8, 12, 12], "texture": "#gem"}, "up": {"uv": [8, 8, 12, 12], "texture": "#gem"}, "down": {"uv": [8, 8, 12, 12], "texture": "#gem"} } }
+  ],
+  "display": { "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [1.1, 1.1, 1.1]} }
+}

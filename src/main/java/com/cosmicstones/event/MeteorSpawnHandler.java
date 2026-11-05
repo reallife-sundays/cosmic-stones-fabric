@@ -44,8 +44,10 @@ public class MeteorSpawnHandler {
             );
         });
 
-        ServerTickEvents.END_WORLD_TICK.register(world -> {
-            if (world.dimension() != Level.OVERWORLD) return;
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            ServerLevel world = server.getLevel(Level.OVERWORLD);
+            if (world == null) return;
+            
             if (pendingPos == null && autoEnabled && world.isNight() && world.getDayTime() % 24000 == 14000) {
                 if (!world.players().isEmpty() && RANDOM.nextFloat() < 0.20F) {
                     ServerPlayer anchor = world.players().get(RANDOM.nextInt(world.players().size()));

@@ -84,7 +84,11 @@ public class CosmicSiphonItem extends Item {
                 stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                 syncModelData(stack, "");
 
-                player.getInventory().placeItemBackInInventory(new ItemStack(item));
+                ItemStack stoneStack = new ItemStack(item);
+                if (!player.getInventory().add(stoneStack)) {
+                    player.drop(stoneStack, false);
+                }
+                
                 level.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.PLAYERS, 1.0F, 1.0F);
                 player.displayClientMessage(Component.literal("Extracted " + stone.toUpperCase() + " Stone.").withStyle(ChatFormatting.YELLOW), true);
                 return InteractionResult.SUCCESS;
@@ -139,7 +143,7 @@ public class CosmicSiphonItem extends Item {
                 for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> e != player)) {
                     target.hurtServer(level, level.damageSources().playerAttack(player), damage);
                     target.push(0, 0.55D + (stacks * 0.05D), 0);
-                    target.hurtMarked = true;
+                    target.markHurt();
                 }
                 level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, player.getX(), player.getY(), player.getZ(), 1, 0, 0, 0, 0);
                 level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.5F, 0.7F);

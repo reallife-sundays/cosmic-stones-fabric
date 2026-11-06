@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "cosmicstones",
+  "version": "${version}",
+  "name": "Cosmic Infinity Stones",
+  "description": "The six cosmic singularities for Fabric 26.3.",
+  "authors": ["Oscar Moran"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [ "com.cosmicstones.CosmicStonesMod" ],
+    "client": [ "com.cosmicstones.client.CosmicStonesClient" ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
